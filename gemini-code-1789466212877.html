@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הלוח השנה האולטימטיבי - עברי ולועזי</title>
+    <!-- ייבוא פונטים מודרניים -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Heebo', sans-serif;
+        }
+
+        body {
+            /* רקע עמוק ויוקרתי עם מעבר צבע וטקסטורה ויזואלית מתקדמת */
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #090d16 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* אלמנט רקע ויזואלי מתקדם למניעת רקע חלק */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(129, 140, 248, 0.3);
+        }
+
+        .live-clock {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* סגנון כרטיסיות זכוכית יוקרתיות */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* לוח שנה */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .calendar-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-nav:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+            transform: translateY(-2px);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day-cell {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            min-height: 85px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .day-cell:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: scale(1.03);
+        }
+
+        .day-cell.today {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.2));
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .day-cell.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        .day-cell.empty:hover {
+            transform: none;
+        }
+
+        .gregorian-num {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .hebrew-num {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 6px;
+            align-self: flex-start;
+        }
+
+        .holiday-tag {
+            font-size: 0.7rem;
+            background: rgba(244, 63, 94, 0.2);
+            color: #fb7185;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-top: 4px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* סיידבר (תבלינים ותוספות) */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .widget-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zmanim-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .zmanim-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 10px;
+            border-right: 4px solid #818cf8;
+            font-size: 0.95rem;
+        }
+
+        .zmanim-item span:last-child {
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        /* פתקים / משימות מהירות */
+        .notes-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .notes-input-group input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: #fff;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .notes-input-group input:focus {
+            border-color: #38bdf8;
+        }
+
+        .btn-add {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 0 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-add:hover {
+            background: #7dd3fc;
+        }
+
+        .notes-list {
+            list-style: none;
+            max-height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notes-list li {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-list li button {
+            background: transparent;
+            border: none;
+            color: #fb7185;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>לוח השנה האולטימטיבי</h1>
+        <div class="live-clock" id="liveClock">טוען שעון...</div>
+    </header>
+
+    <div class="container">
+        <!-- אזור הלוח הראשי -->
+        <div class="glass-card">
+            <div class="calendar-header">
+                <button class="btn-nav" onclick="changeMonth(-1)">&#10095; חודש קודם</button>
+                <h2 id="monthYearDisplay">ספטמבר 2026</h2>
+                <button class="btn-nav" onclick="changeMonth(1)">חודש הבא &#10094;</button>
+            </div>
+
+            <div class="weekdays">
+                <div>א'</div>
+                <div>ב'</div>
+                <div>ג'</div>
+                <div>ד'</div>
+                <div>ה'</div>
+                <div>ו'</div>
+                <div>ש'</div>
+            </div>
+
+            <div class="days-grid" id="daysGrid">
+                <!-- ימים יטענו דינמית דרך JavaScript -->
+            </div>
+        </div>
+
+        <!-- סיידבר תוספות ותבלינים -->
+        <div class="sidebar">
+            <!-- זמני היום -->
+            <div class="glass-card">
+                <div class="widget-title">⏳ זמני היום (לשם המחשה)</div>
+                <ul class="zmanim-list">
+                    <li class="zmanim-item"><span>עלות השחר</span><span>05:12</span></li>
+                    <li class="zmanim-item"><span>זריחה</span><span>06:24</span></li>
+                    <li class="zmanim-item"><span>שקיעה</span><span>19:10</span></li>
+                    <li class="zmanim-item" style="border-right-color: #f43f5e;"><span>כניסת שבת</span><span>18:32</span></li>
+                </ul>
+            </div>
+
+            <!-- פתקיות / תזכורות אישיות -->
+            <div class="glass-card">
+                <div class="widget-title">📌 פתקים מהירים</div>
+                <div class="notes-input-group">
+                    <input type="text" id="noteInput" placeholder="הוסף משימה או אירוע...">
+                    <button class="btn-add" onclick="addNote()">+</button>
+                </div>
+                <ul class="notes-list" id="notesList">
+                    <!-- פתקים יתוספו לכאן -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // שעון חי בזמן אמת
+        function updateClock() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('liveClock').innerText = now.toLocaleDateString('he-IL', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ניהול לוח שנה בסיסי (לועזי משולב בתוויות עבריות לדוגמה)
+        let currentDate = new Date();
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const monthsNames = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+            document.getElementById('monthYearDisplay').innerText = `${monthsNames[month]} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            const grid = document.getElementById('daysGrid');
+            grid.innerHTML = '';
+
+            // ימים ריקים בתחילת החודש
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('day-cell', 'empty');
+                grid.appendChild(emptyCell);
+            }
+
+            // ימי החודש
+            const today = new Date();
+            for (let day = 1; day <= totalDays; day++) {
+                const cell = document.createElement('div');
+                cell.classList.add('day-cell');
+
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    cell.classList.add('today');
+                }
+
+                // הדמיה של תאריך עברי מקורב ליום
+                const fakeHebrewDay = ((day + 10) % 30) || 1;
+
+                cell.innerHTML = `
+                    <div class="gregorian-num">${day}</div>
+                    <div class="hebrew-num">כסלו ${fakeHebrewDay}</div>
+                `;
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        renderCalendar();
+
+        // ניהול פתקיות
+        function addNote() {
+            const input = document.getElementById('noteInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const list = document.getElementById('notesList');
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${text}</span> <button onclick="this.parentElement.remove()">✕</button>`;
+            list.appendChild(li);
+            input.value = '';
+        }
+    </script>
+</body>
+</html>
